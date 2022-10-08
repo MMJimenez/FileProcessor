@@ -7,8 +7,10 @@ public class FileCreator {
    * @param args
    */
     public static void main(String[] args) {
-      String texto = "a\nb\n";
-      System.out.print(texto);
-      System.out.println("xxx");
+  
+      String texto1 = "YUUUU";
+      String texto2 = "SUM";
+      texto1.concat(texto2);
+      System.out.println(texto1);
     }
 }

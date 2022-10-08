@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 
 public class FileHandler {
@@ -36,9 +34,11 @@ public class FileHandler {
             numeration++;
         }
 
-        file.createNewFile();
-        writeInFile(file, text);
-
+        if (file.createNewFile()) {
+            writeInFile(file, text);
+        } else {
+            System.out.println("El archivo no se ha creado.");
+        }
     }
 
     private static void writeInFile(File file, String text) throws IOException {
@@ -47,8 +47,15 @@ public class FileHandler {
         myWriter.close();
     }
 
-//    private static String readFileToString(File file) {
-//        return "";
-//    }
+    public static String readFileToString(String path) throws IOException {
+        var bufferedReader = new BufferedReader(new FileReader(path));
+        String string;
+        String text = "";
+        while ((string = bufferedReader.readLine()) != null) {
+            text = text.concat(string);
+            text = text.concat("\n");
+        }
+        return text;
+    }
 }
 
