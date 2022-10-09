@@ -2,8 +2,9 @@ import java.io.*;
 import java.util.HashMap;
 
 public class FileHandler {
-    private static String dirName = "File_Processor_Data";
-    private static String fullPath = "";
+    private static String dirPath = "File_Processor_Data";
+
+
 
     public static String csvTextFormatter(HashMap<String, Integer> map) {
         StringBuilder csv = new StringBuilder();
@@ -17,13 +18,13 @@ public class FileHandler {
     }
 
     public static void makeDirectory() {
-        File directory = new File(fullPath + dirName);
+        File directory = new File(dirPath);
         if (!directory.exists()) directory.mkdir();
     }
 
     public static void createCsvFile(String text, String name)
             throws IOException {
-        String path = dirName + File.separatorChar + name;
+        String path = dirPath + File.separatorChar + name;
         String extension = ".csv";
 
         File file = new File(path + extension);

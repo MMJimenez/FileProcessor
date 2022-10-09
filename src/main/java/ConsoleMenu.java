@@ -59,10 +59,9 @@ public class ConsoleMenu {
     }
 
     private void menuHistogramController() {
-        Scanner input = new Scanner(System.in);
-
         menuHistogram();
-
+        String containerPath = getInputPath();
+        FileHandler.
     }
 
 
@@ -78,13 +77,16 @@ public class ConsoleMenu {
 
     private String getInputPath() {
         Scanner input = new Scanner(System.in);
+
         String containerPath = input.nextLine();
         var file = new File(containerPath);
-        if (!file.exists()) {
-            System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
-        }
-        return "";
 
+        while (!file.exists()) {
+            System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
+            containerPath = input.nextLine();
+            file = new File(containerPath);
+        }
+        return containerPath;
     }
 
     public Boolean askYesOrNot() {
@@ -98,9 +100,7 @@ public class ConsoleMenu {
             answer = input.next();
             answer = String.valueOf(answer.charAt(0));
         }
-
-        return answer.toLowerCase().equals("y");
+        return answer.equalsIgnoreCase("y");
     }
-
 
 }
