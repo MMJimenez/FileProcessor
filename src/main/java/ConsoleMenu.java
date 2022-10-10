@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
@@ -7,12 +8,15 @@ import static java.util.Map.entry;
 
 public class ConsoleMenu {
     private enum ERROR_KEY {
-        WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N
+        WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
     }
     Map<ERROR_KEY, String> ERROR_MSG = Map.ofEntries(
-            entry(ERROR_KEY.WRONG_NUMBER, "Se espera un número"),
-            entry(ERROR_KEY.FILE_NOT_FOUND, "No se ha encontrado la carpeta"),
-            entry(ERROR_KEY.NOT_Y_OR_N, "Se espera: 'Y' o 'N'")
+            entry(ERROR_KEY.WRONG_NUMBER, "Se espera un número."),
+            entry(ERROR_KEY.FILE_NOT_FOUND, "No se ha encontrado."),
+            entry(ERROR_KEY.NOT_Y_OR_N, "Se espera: 'Y' o 'N'."),
+            entry(ERROR_KEY.IS_NOT_FILE, "Se espera un Archivo, no una carpeta."),
+            entry(ERROR_KEY.IS_NOT_DIR, "Se espera un Archivo, no una carpeta."),
+            entry(ERROR_KEY.TRY_AGAIN, "Porfavor, vuelva a intentarlo.")
     );
 
 
@@ -29,9 +33,9 @@ public class ConsoleMenu {
 
     public void menuMain() {
         System.out.println("Menu Principal");
-        System.out.println("1. Iniciar histograma.");
-        System.out.println("2. Configurar ruta de guardado.");
-        System.out.println("3. Salir");
+        System.out.println("\t1. Iniciar histograma.");
+        System.out.println("\t2. Configurar ruta de guardado.");
+        System.out.println("\t3. Salir");
     }
 
     public void menuHistogram() {
@@ -53,18 +57,53 @@ public class ConsoleMenu {
                 menuHistogramController();
                 break;
             case 2:
-
+                //TODO: hay que terminar poraqui
+                break;
             default:
         }
     }
 
     private void menuHistogramController() {
-        menuHistogram();
-        String containerPath = getInputPath();
-        FileHandler.
+        Boolean isFile = false;
+        String filePath = "";
+        while (!isFile) {
+            menuHistogram();
+            //TODO: Peta si es una carpeta
+            filePath = getInputFilePath();
+            FileHandler.setDirPath(filePath);
+            try {
+                FileHandler.showLinesOfFile(filePath, 5);
+            } catch (IOException e) {
+                //TODO: Meter aqui un mensaje o algo y que lleve al menu anterior
+                e.printStackTrace();
+            }
+            System.out.println("¿Es este el archivo? 'Y'/'N'");
+            isFile = askYesOrNot();
+        }
+
+        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? 'Y'/'N'");
+        System.out.println("\t" + filePath);
+        Boolean confirmDir = askYesOrNot();
+        String dirPath = "";
+        if (!confirmDir) {
+            //TODO: REVISAR si es DIrectorio hacer nuevo metodo con file.isDirectory() file.getParentFile()
+            System.out.println("Indica la ruta donde quieres guardar el archivo csv");
+            dirPath = getInputDirPath();
+        } else {
+            dirPath = getContainerFile(filePath);
+        }
+        FileHandler.setDirPath(dirPath);
+        // Starts the histogram creation.
+        //TODO: hacer sobre carga, si no indicamos nombre de archivo que coja el del archivo  de texto
+
+            //FileHandler.createCsvFile(FileHandler.readFileToString(filePath), getNameFile(filePath));
+
+
+        System.out.println("OK");
     }
 
 
+    //GET INPUT METHODS
     private int getInputNumber() {
         Scanner input = new Scanner(System.in);
         try {
@@ -75,21 +114,74 @@ public class ConsoleMenu {
         }
     }
 
-    private String getInputPath() {
+    private String getInputFilePath() {
         Scanner input = new Scanner(System.in);
 
-        String containerPath = input.nextLine();
-        var file = new File(containerPath);
+        String filePath = input.nextLine();
+        var file = new File(filePath);
+        Boolean isCorrect = false;
 
-        while (!file.exists()) {
-            System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
-            containerPath = input.nextLine();
-            file = new File(containerPath);
+        while (!isCorrect) {
+            //Checks
+            if (!file.exists()) {
+                System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
+                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+            } else if (file.isDirectory()) {
+                System.out.println(ERROR_MSG.get(ERROR_KEY.IS_NOT_FILE));
+                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+            } else {
+                isCorrect = true;
+            }
+            //Ask for new path file
+            if (!isCorrect) {
+                filePath = input.nextLine();
+                file = new File(filePath);
+            }
         }
-        return containerPath;
+        return filePath;
     }
 
-    public Boolean askYesOrNot() {
+    //
+    private String getInputDirPath() {
+        Scanner input = new Scanner(System.in);
+
+        String filePath = input.nextLine();
+        var file = new File(filePath);
+        Boolean isCorrect = false;
+
+        while (!isCorrect) {
+            //Checks
+            if (!file.exists()) {
+                System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
+                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+            } else if (!file.isDirectory()) {
+                System.out.println(ERROR_MSG.get(ERROR_KEY.IS_NOT_DIR));
+                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+            } else {
+                isCorrect = true;
+            }
+            //Ask for new path file
+            if (!isCorrect) {
+                filePath = input.nextLine();
+                file = new File(filePath);
+            }
+        }
+        return filePath;
+    }
+
+    private String getNameFile(String filePath) {
+        var file = new File(filePath);
+        if (file.exists()) return file.getName();
+        else return "result_csv";
+    }
+
+    private String getContainerFile(String filePath) {
+        var file = new File(filePath);
+        if (file.exists()) return file.getParentFile().getAbsolutePath();
+        else return "";
+    }
+
+    private Boolean askYesOrNot() {
         Scanner input = new Scanner(System.in);
 
         String answer = input.next();

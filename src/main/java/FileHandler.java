@@ -4,9 +4,16 @@ import java.util.HashMap;
 public class FileHandler {
     private static String dirPath = "File_Processor_Data";
 
+    public static String getDirPath() {
+        return dirPath;
+    }
 
+    public static void setDirPath(String dirPath) {
+        FileHandler.dirPath = dirPath;
+        //TODO: Modify in config.properties
+    }
 
-    public static String csvTextFormatter(HashMap<String, Integer> map) {
+    private static String csvTextFormatter(HashMap<String, Integer> map) {
         StringBuilder csv = new StringBuilder();
         for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
             String key = entry.getKey();
@@ -17,7 +24,7 @@ public class FileHandler {
         return csv.substring(0, csv.length() - 2);
     }
 
-    public static void makeDirectory() {
+    private static void makeDirectory() {
         File directory = new File(dirPath);
         if (!directory.exists()) directory.mkdir();
     }
@@ -34,29 +41,37 @@ public class FileHandler {
             file = new File(tempPath);
             numeration++;
         }
-
         if (file.createNewFile()) {
-            writeInFile(file, text);
+            //TODO
+            //writeCsvInFile(file, text);
         } else {
             System.out.println("El archivo no se ha creado.");
         }
     }
 
-    private static void writeInFile(File file, String text) throws IOException {
-        FileWriter myWriter = new FileWriter(file);
-        myWriter.write(text);
-        myWriter.close();
+    private static void writeCsvInFile(File file) throws IOException {
+        for (String word: TextAnalyzer.wordsFrequency.keySet()) {
+            String key = word.toString();
+            String value = TextAnalyzer.wordsFrequency.get(word).toString();
+            System.out.println(key + " " + value);
+        }
     }
 
-    public static String readFileToString(String path) throws IOException {
+    public static void analyzeFileToHistogram(String path) throws IOException {
         var bufferedReader = new BufferedReader(new FileReader(path));
         String string;
-        String text = "";
         while ((string = bufferedReader.readLine()) != null) {
-            text = text.concat(string);
-            text = text.concat("\n");
+            TextAnalyzer.countWords(string);
         }
-        return text;
     }
+
+    public static void showLinesOfFile(String path, Integer numberOfLines) throws IOException {
+        var bufferedReader = new BufferedReader(new FileReader(path));
+        String string = "";
+        for (int i = 0; i < numberOfLines && ((string = bufferedReader.readLine()) != null); i++) {
+            System.out.println(string);
+        }
+    }
+
 }
 
