@@ -86,7 +86,7 @@ public class ConsoleMenu {
                 //Print the file
                 FileHandler.showFile(fileTextPath);
             } catch (IOException e) {
-//TODO: Meter aqui un mensaje o algo y que lleve al menu anterior
+                System.out.println("No se ha podido mostrar el contenido del texto.");
                 e.printStackTrace();
             }
             //Ask for confirmation that this is the correct text file
@@ -111,6 +111,28 @@ public class ConsoleMenu {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String menuSelectTextFileController(String fileTextPath) {
+        Boolean isFile = false;
+
+        while (!isFile) {
+            menuHistogramText();
+            fileTextPath = getInputFilePath();
+
+            try {
+                //Print the file
+                FileHandler.showFile(fileTextPath);
+            } catch (IOException e) {
+                System.out.println("No se ha podido mostrar el contenido del texto.");
+                e.printStackTrace();
+            }
+            //Ask for confirmation that this is the correct text file
+            System.out.println("\n¿Es este el archivo? 'Y'/'N'");
+            isFile = askYesOrNot();
+        }
+
+        return fileTextPath;
     }
 
 

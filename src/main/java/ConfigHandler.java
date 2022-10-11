@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.Properties;
 
+//Helps to work with the config file, using Properties
 public class ConfigHandler {
     private String configPath = ".";
     private String configFileName = "file_processor.config";
