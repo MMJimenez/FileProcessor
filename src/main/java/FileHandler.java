@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.HashMap;
 
 public class FileHandler {
-    private static String dirPath = "file_processor_data";
+    private static String dirPath = "";
 
     public static String getDirPath() {
         return dirPath;
@@ -16,9 +16,11 @@ public class FileHandler {
     static {
         var configHandler = new ConfigHandler();
         try {
-            setDirPath(
-                configHandler.loadPropertyOrRestoreIt("csv_save_path")
-            );
+            String tempDirPath = configHandler.loadPropertyOrRestoreIt("csv_save_path");
+            if (!new File(tempDirPath).exists()) {
+                tempDirPath = configHandler.restoreFromDefaultConfigFile("csv_save_path");
+            }
+            setDirPath(tempDirPath);
         } catch (IOException e) {
             e.printStackTrace();
         }

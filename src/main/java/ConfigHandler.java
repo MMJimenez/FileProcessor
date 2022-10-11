@@ -45,7 +45,7 @@ public class ConfigHandler {
         String propertyValue;
         //if the property is not find, restore it from the default config file
         if (!configurations.containsKey(propertyName)) {
-            propertyValue = restorePropertyFromDefaultConfigFile(propertyName);
+            propertyValue = restoreFromDefaultConfigFile(propertyName);
         } else {
             propertyValue = configurations.getProperty(propertyName);
         }
@@ -66,7 +66,7 @@ public class ConfigHandler {
         configProperties.store(fileOutputStream, COMMENT_STORE);
     }
 
-    private String restorePropertyFromDefaultConfigFile(String propertyName) throws IOException {
+    public String restoreFromDefaultConfigFile(String propertyName) throws IOException {
         var configFile = new FileInputStream(getFullConfigPath());
         var configProperties = new Properties();
         configProperties.load(configFile);

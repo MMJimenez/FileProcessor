@@ -41,7 +41,7 @@ public class ConsoleMenu {
     public void menuMainText() {
         System.out.println("Menu Principal");
         System.out.println("\t1. Iniciar histograma.");
-        System.out.println("\t2. Configurar ruta de guardado.");
+        System.out.println("\t2. Opciones.");
         System.out.println("\t3. Salir");
     }
 
@@ -50,29 +50,51 @@ public class ConsoleMenu {
         System.out.println("Indica la ruta donde esta el archivo de texto.");
     }
 
-    public void mainLoop() {
-        title();
-        mainMenuController();
-
+    public void menuConfigurationText() {
+        System.out.println("Opciones");
+        System.out.println("Puedes configurar una carpeta para guardar los csv resultantes. Se usará siempre sin preguntar.");
+        System.out.println("Puedes deshabilitarla en cualquier momento volviendo a este menu.");
+        System.out.print("\t1. Carpeta guardado: ");
+        if (!useConfiguredSaveDir) {
+            System.out.println("DESACTIVADA");
+        } else {
+            System.out.println("ACTIVADA");
+        }
+        System.out.println("\t2. Volver sin hacer cambios.");
     }
 
+    public void mainLoop() {
+        title();
+        while (true) {
+            mainMenuController();
+        }
+    }
+
+
+    //menu controllers
     public void mainMenuController() {
         menuMainText();
 
-        Boolean isAnOption = false;
-        Integer optionNum = getInputNumber();
-        switch (optionNum) {
-            case 1:
-                menuHistogramController();
-                break;
-            case 2:
-                //TODO: hay que terminar poraqui
-                break;
-            case 3:
-                System.exit(0);
-                break;
-            default:
-                System.out.println(ERROR_MSG.get(ERROR_KEY.OPTION_NOT_EXIST));
+        Boolean isValidOption = false;
+        while (!isValidOption) {
+            Integer optionNum = getInputNumber();
+            switch (optionNum) {
+                case 1:
+                    isValidOption = true;
+                    menuHistogramController();
+                    break;
+                case 2:
+                    isValidOption = true;
+                    menuConfigurationText();
+                    menuConfigurationController();
+                    break;
+                case 3:
+                    isValidOption = true;
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println(ERROR_MSG.get(ERROR_KEY.OPTION_NOT_EXIST));
+            }
         }
     }
 
@@ -88,6 +110,47 @@ public class ConsoleMenu {
             e.printStackTrace();
         }
     }
+
+    private void menuConfigurationController() {
+        Boolean isValidOption = false;
+        while (!isValidOption) {
+            Integer optionNum = getInputNumber();
+            switch (optionNum) {
+                case 1:
+                    isValidOption = true;
+                    //Configurar path
+                    menuHistogramController();
+                    break;
+                case 2:
+                    isValidOption = true;
+                    //Vuelve al menu anterior
+                    break;
+                default:
+                    System.out.println(ERROR_MSG.get(ERROR_KEY.OPTION_NOT_EXIST));
+            }
+        }
+    }
+
+    private void menuSelectSaveDirectory() {
+        var file = new File(FileHandler.getDirPath());
+        if (!useConfiguredSaveDir) {
+            System.out.println("¿Quieres ACTIVAR la opción?: ");
+            //askYesOrNot()
+        } else {
+            System.out.println("¿Quieres DESACTIVAR la opción?:  ");
+            //askYesOrNot()
+        }
+
+
+        if (useConfiguredSaveDir) {
+            System.out.println("Configuración de carpeta de guardado");
+            System.out.println("Esta es la carpeta que hay por defecto: ");
+            System.out.println("\t" + file.getPath());
+            System.out.println("¿Quieres usar otra?: ");
+            askYesOrNot():
+        }
+    }
+
 
     private void menuSelectDirSavePath(String filePath) {
         String dirPath = getContainerFile(filePath);
@@ -168,7 +231,6 @@ public class ConsoleMenu {
         return filePath;
     }
 
-    //
     private String getInputDirPath() {
         Scanner input = new Scanner(System.in);
 
