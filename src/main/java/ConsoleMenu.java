@@ -147,7 +147,6 @@ public class ConsoleMenu {
             System.out.println("Esta es la carpeta que hay por defecto: ");
             System.out.println("\t" + file.getPath());
             System.out.println("¿Quieres usar otra?: ");
-            askYesOrNot():
         }
     }
 
