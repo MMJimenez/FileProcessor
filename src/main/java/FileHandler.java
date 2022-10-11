@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.HashMap;
 
 public class FileHandler {
-    private static String dirPath = "File_Processor_Data";
+    private static String dirPath = "file_processor_data";
 
     public static String getDirPath() {
         return dirPath;
@@ -10,11 +10,22 @@ public class FileHandler {
 
     public static void setDirPath(String dirPath) {
         FileHandler.dirPath = dirPath;
-        //TODO: Modify in config.properties
+        //TODO: Modify in file_processor.config
+    }
+
+    static {
+        var configHandler = new ConfigHandler();
+        try {
+            setDirPath(
+                configHandler.loadPropertyOrRestoreIt("csv_save_path")
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void makeDirectory() {
-        File directory = new File(dirPath);
+        File directory = new File(getDirPath());
         if (!directory.exists()) directory.mkdir();
     }
 
@@ -22,7 +33,7 @@ public class FileHandler {
             throws IOException {
         String name = textFile.getName().split("\\.")[0];
         //TODO revisar lo del dirPath
-        String path = dirPath + File.separatorChar + name;
+        String path = getDirPath() + File.separatorChar + name;
         String extension = ".csv";
 
         File file = new File(path + extension);
@@ -39,8 +50,10 @@ public class FileHandler {
         if (file.createNewFile()) {
             writeCsvIntoFile(file);
         } else {
-            System.out.println("El archivo no se ha creado.");
+            System.out.println("El archivo csv no ha podido crearse.");
         }
+        //clear the wordsFrequency hashmap
+        TextAnalyzer.wordsFrequency.clear();
     }
 
     private static void writeCsvIntoFile(File file) throws IOException {

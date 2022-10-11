@@ -8,17 +8,22 @@ import static java.util.Map.entry;
 
 public class ConsoleMenu {
     private enum ERROR_KEY {
-        WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
+        OPTION_NOT_EXIST, WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
     }
+
     Map<ERROR_KEY, String> ERROR_MSG = Map.ofEntries(
+            entry(ERROR_KEY.OPTION_NOT_EXIST, "Esa opción no existe."),
             entry(ERROR_KEY.WRONG_NUMBER, "Se espera un número."),
             entry(ERROR_KEY.FILE_NOT_FOUND, "No se ha encontrado."),
             entry(ERROR_KEY.NOT_Y_OR_N, "Se espera: 'Y' o 'N'."),
             entry(ERROR_KEY.IS_NOT_FILE, "Se espera un Archivo, no una carpeta."),
-            entry(ERROR_KEY.IS_NOT_DIR, "Se espera un Archivo, no una carpeta."),
-            entry(ERROR_KEY.TRY_AGAIN, "Porfavor, vuelva a intentarlo.")
+            entry(ERROR_KEY.IS_NOT_DIR, "Se espera un Archivo, no una carpeta.")
+            //entry(ERROR_KEY.TRY_AGAIN, "Porfavor, vuelva a intentarlo.")
     );
 
+    private void printInputMark() {
+        System.out.print("-> ");
+    }
 
     public void screenCleaner() {
         for (int i = 0; i < 20; i++) System.out.println();
@@ -31,14 +36,14 @@ public class ConsoleMenu {
         System.out.println();
     }
 
-    public void menuMain() {
+    public void menuMainText() {
         System.out.println("Menu Principal");
         System.out.println("\t1. Iniciar histograma.");
         System.out.println("\t2. Configurar ruta de guardado.");
         System.out.println("\t3. Salir");
     }
 
-    public void menuHistogram() {
+    public void menuHistogramText() {
         System.out.println("Histograma");
         System.out.println("Indica la ruta donde esta el archivo de texto.");
     }
@@ -50,7 +55,9 @@ public class ConsoleMenu {
     }
 
     public void mainMenuController() {
-        menuMain();
+        menuMainText();
+
+        Boolean isAnOption = false;
         Integer optionNum = getInputNumber();
         switch (optionNum) {
             case 1:
@@ -59,25 +66,31 @@ public class ConsoleMenu {
             case 2:
                 //TODO: hay que terminar poraqui
                 break;
+            case 3:
+                System.exit(0);
+                break;
             default:
+                System.out.println(ERROR_MSG.get(ERROR_KEY.OPTION_NOT_EXIST));
         }
     }
 
     private void menuHistogramController() {
+        screenCleaner();
         Boolean isFile = false;
         String fileTextPath = "";
         while (!isFile) {
-            menuHistogram();
-
+            menuHistogramText();
             fileTextPath = getInputFilePath();
-            FileHandler.setDirPath(fileTextPath);
+
             try {
+                //Print the file
                 FileHandler.showFile(fileTextPath);
             } catch (IOException e) {
-                //TODO: Meter aqui un mensaje o algo y que lleve al menu anterior
+//TODO: Meter aqui un mensaje o algo y que lleve al menu anterior
                 e.printStackTrace();
             }
-            System.out.println("¿Es este el archivo? 'Y'/'N'");
+            //Ask for confirmation that this is the correct text file
+            System.out.println("\n¿Es este el archivo? 'Y'/'N'");
             isFile = askYesOrNot();
         }
 
@@ -98,16 +111,12 @@ public class ConsoleMenu {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //FileHandler.createCsvFile(FileHandler.readFileToString(filePath), getNameFile(filePath));
-
-
-        System.out.println("OK");
     }
 
 
-    //GET INPUT METHODS
+    //getInput... Methods
     private int getInputNumber() {
+        printInputMark();
         Scanner input = new Scanner(System.in);
         try {
             return input.nextInt();
@@ -120,23 +129,25 @@ public class ConsoleMenu {
     private String getInputFilePath() {
         Scanner input = new Scanner(System.in);
 
+        printInputMark();
         String filePath = input.nextLine();
         var file = new File(filePath);
         Boolean isCorrect = false;
 
         while (!isCorrect) {
-            //Checks
+            //Checks if the file is correct.
             if (!file.exists()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
-                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else if (file.isDirectory()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.IS_NOT_FILE));
-                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else {
                 isCorrect = true;
             }
             //Ask for new path file
             if (!isCorrect) {
+                printInputMark();
                 filePath = input.nextLine();
                 file = new File(filePath);
             }
@@ -148,23 +159,25 @@ public class ConsoleMenu {
     private String getInputDirPath() {
         Scanner input = new Scanner(System.in);
 
+        printInputMark();
         String filePath = input.nextLine();
         var file = new File(filePath);
         Boolean isCorrect = false;
 
         while (!isCorrect) {
-            //Checks
+            //Checks if the file is correct.
             if (!file.exists()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
-                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else if (!file.isDirectory()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.IS_NOT_DIR));
-                System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
+                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else {
                 isCorrect = true;
             }
             //Ask for new path file
             if (!isCorrect) {
+                printInputMark();
                 filePath = input.nextLine();
                 file = new File(filePath);
             }
@@ -187,11 +200,13 @@ public class ConsoleMenu {
     private Boolean askYesOrNot() {
         Scanner input = new Scanner(System.in);
 
+        printInputMark();
         String answer = input.next();
         answer = String.valueOf(answer.charAt(0));
 
-        while(!"nNyY".contains(answer)) {
+        while (!"nNyY".contains(answer)) {
             System.out.println(ERROR_MSG.get(ERROR_KEY.NOT_Y_OR_N));
+            printInputMark();
             answer = input.next();
             answer = String.valueOf(answer.charAt(0));
         }
