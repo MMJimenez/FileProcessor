@@ -11,6 +11,8 @@ public class ConsoleMenu {
         OPTION_NOT_EXIST, WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
     }
 
+    private Boolean useConfiguredSaveDir = false;
+
     Map<ERROR_KEY, String> ERROR_MSG = Map.ofEntries(
             entry(ERROR_KEY.OPTION_NOT_EXIST, "Esa opción no existe."),
             entry(ERROR_KEY.WRONG_NUMBER, "Se espera un número."),
@@ -76,35 +78,9 @@ public class ConsoleMenu {
 
     private void menuHistogramController() {
         screenCleaner();
-        Boolean isFile = false;
-        String fileTextPath = "";
-        while (!isFile) {
-            menuHistogramText();
-            fileTextPath = getInputFilePath();
+        String fileTextPath = menuSelectTextFile();
+        if (!useConfiguredSaveDir) menuSelectDirSavePath(fileTextPath);
 
-            try {
-                //Print the file
-                FileHandler.showFile(fileTextPath);
-            } catch (IOException e) {
-                System.out.println("No se ha podido mostrar el contenido del texto.");
-                e.printStackTrace();
-            }
-            //Ask for confirmation that this is the correct text file
-            System.out.println("\n¿Es este el archivo? 'Y'/'N'");
-            isFile = askYesOrNot();
-        }
-
-        String dirPath = getContainerFile(fileTextPath);
-        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? 'Y'/'N'");
-        System.out.println("\t" + dirPath);
-        //Confirm if user want to change the dir for the writer
-        Boolean confirmDir = askYesOrNot();
-        if (!confirmDir) {
-            System.out.println("Indica la ruta donde quieres guardar el archivo csv");
-            dirPath = getInputDirPath();
-        }
-        // Saves the dirPath.
-        FileHandler.setDirPath(dirPath);
         try {
             // Starts the histogram creation.
             FileHandler.createCsvFromFile(new File(fileTextPath));
@@ -113,7 +89,22 @@ public class ConsoleMenu {
         }
     }
 
-    private String menuSelectTextFileController(String fileTextPath) {
+    private void menuSelectDirSavePath(String filePath) {
+        String dirPath = getContainerFile(filePath);
+        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? 'Y'/'N'");
+        System.out.println("\t" + dirPath);
+        //Confirm if user want to change the dir for the writer
+        Boolean confirmDir = askYesOrNot();
+        if (!confirmDir) {
+            System.out.println("Indica la ruta donde quieres guardar el archivo csv");
+            dirPath = getInputDirPath();
+        }
+
+        FileHandler.setDirPath(dirPath);
+    }
+
+    private String menuSelectTextFile() {
+        String fileTextPath = "";
         Boolean isFile = false;
 
         while (!isFile) {
@@ -121,6 +112,7 @@ public class ConsoleMenu {
             fileTextPath = getInputFilePath();
 
             try {
+                screenCleaner();
                 //Print the file
                 FileHandler.showFile(fileTextPath);
             } catch (IOException e) {
@@ -134,7 +126,6 @@ public class ConsoleMenu {
 
         return fileTextPath;
     }
-
 
     //getInput... Methods
     private int getInputNumber() {

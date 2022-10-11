@@ -24,11 +24,6 @@ public class FileHandler {
         }
     }
 
-    private static void makeDirectory() {
-        File directory = new File(getDirPath());
-        if (!directory.exists()) directory.mkdir();
-    }
-
     public static void createCsvFromFile(File textFile)
             throws IOException {
         String name = textFile.getName().split("\\.")[0];
@@ -54,17 +49,19 @@ public class FileHandler {
         }
         //clear the wordsFrequency hashmap
         TextAnalyzer.wordsFrequency.clear();
+        System.out.println("\nArchivo csv creado:\n\t" + file.getPath());
     }
 
     private static void writeCsvIntoFile(File file) throws IOException {
         var bufferedWriter = new BufferedWriter(new FileWriter(file));
-
         for (HashMap.Entry<String, Integer> entry : TextAnalyzer.wordsFrequency.entrySet()) {
             String key = entry.getKey();
             Integer value = entry.getValue();
             String line = key + "," + value.toString();
             bufferedWriter.write(line);
             bufferedWriter.newLine();
+            //prints the line just formatted
+            System.out.println(line);
         }
         bufferedWriter.close();
     }

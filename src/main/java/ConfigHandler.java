@@ -29,7 +29,7 @@ public class ConfigHandler {
 
         int b = 0;
         while ((b = inputStream.read()) > 0) fileOutputStream.write(b);
-        System.out.println("Se crea");
+        System.out.println("Creado archivo de configuración (file_processor.config)");
     }
 
     public String loadPropertyOrRestoreIt(String propertyName) throws IOException {
@@ -86,6 +86,7 @@ public class ConfigHandler {
         fileOutputStream.close();
 
         //In case you need to use
+        System.out.println("Restaurado datos en archivo de configuración (file_processor.config)");
         return propertyValue;
     }
 
