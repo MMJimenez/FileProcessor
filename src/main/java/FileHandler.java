@@ -13,24 +13,15 @@ public class FileHandler {
         //TODO: Modify in config.properties
     }
 
-    private static String csvTextFormatter(HashMap<String, Integer> map) {
-        StringBuilder csv = new StringBuilder();
-        for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Integer value = entry.getValue();
-            csv.append(key).append(",").append(value.toString()).append("\n");
-        }
-        //substring() using for remove the 2 last chars "\n"
-        return csv.substring(0, csv.length() - 2);
-    }
-
     private static void makeDirectory() {
         File directory = new File(dirPath);
         if (!directory.exists()) directory.mkdir();
     }
 
-    public static void createCsvFile(String text, String name)
+    public static void createCsvFromFile(File textFile)
             throws IOException {
+        String name = textFile.getName().split("\\.")[0];
+        //TODO revisar lo del dirPath
         String path = dirPath + File.separatorChar + name;
         String extension = ".csv";
 
@@ -41,37 +32,45 @@ public class FileHandler {
             file = new File(tempPath);
             numeration++;
         }
+
+        //Feeds the TextAnalyzer.wordsFrequency
+        analyzeFileToHistogram(textFile);
+
         if (file.createNewFile()) {
-            //TODO
-            //writeCsvInFile(file, text);
+            writeCsvIntoFile(file);
         } else {
             System.out.println("El archivo no se ha creado.");
         }
     }
 
-    private static void writeCsvInFile(File file) throws IOException {
-        for (String word: TextAnalyzer.wordsFrequency.keySet()) {
-            String key = word.toString();
-            String value = TextAnalyzer.wordsFrequency.get(word).toString();
-            System.out.println(key + " " + value);
+    private static void writeCsvIntoFile(File file) throws IOException {
+        var bufferedWriter = new BufferedWriter(new FileWriter(file));
+
+        for (HashMap.Entry<String, Integer> entry : TextAnalyzer.wordsFrequency.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            String line = key + "," + value.toString();
+            bufferedWriter.write(line);
+            bufferedWriter.newLine();
         }
+        bufferedWriter.close();
     }
 
-    public static void analyzeFileToHistogram(String path) throws IOException {
+    public static void analyzeFileToHistogram(File textFile) throws IOException {
+        var bufferedReader = new BufferedReader(new FileReader(textFile));
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            TextAnalyzer.countWords(line);
+        }
+        bufferedReader.close();
+    }
+
+    public static void showFile(String path) throws IOException {
         var bufferedReader = new BufferedReader(new FileReader(path));
-        String string;
-        while ((string = bufferedReader.readLine()) != null) {
-            TextAnalyzer.countWords(string);
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
         }
     }
-
-    public static void showLinesOfFile(String path, Integer numberOfLines) throws IOException {
-        var bufferedReader = new BufferedReader(new FileReader(path));
-        String string = "";
-        for (int i = 0; i < numberOfLines && ((string = bufferedReader.readLine()) != null); i++) {
-            System.out.println(string);
-        }
-    }
-
 }
 

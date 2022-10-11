@@ -65,14 +65,14 @@ public class ConsoleMenu {
 
     private void menuHistogramController() {
         Boolean isFile = false;
-        String filePath = "";
+        String fileTextPath = "";
         while (!isFile) {
             menuHistogram();
-            //TODO: Peta si es una carpeta
-            filePath = getInputFilePath();
-            FileHandler.setDirPath(filePath);
+
+            fileTextPath = getInputFilePath();
+            FileHandler.setDirPath(fileTextPath);
             try {
-                FileHandler.showLinesOfFile(filePath, 5);
+                FileHandler.showFile(fileTextPath);
             } catch (IOException e) {
                 //TODO: Meter aqui un mensaje o algo y que lleve al menu anterior
                 e.printStackTrace();
@@ -81,22 +81,25 @@ public class ConsoleMenu {
             isFile = askYesOrNot();
         }
 
+        String dirPath = getContainerFile(fileTextPath);
         System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? 'Y'/'N'");
-        System.out.println("\t" + filePath);
+        System.out.println("\t" + dirPath);
+        //Confirm if user want to change the dir for the writer
         Boolean confirmDir = askYesOrNot();
-        String dirPath = "";
         if (!confirmDir) {
-            //TODO: REVISAR si es DIrectorio hacer nuevo metodo con file.isDirectory() file.getParentFile()
             System.out.println("Indica la ruta donde quieres guardar el archivo csv");
             dirPath = getInputDirPath();
-        } else {
-            dirPath = getContainerFile(filePath);
         }
+        // Saves the dirPath.
         FileHandler.setDirPath(dirPath);
-        // Starts the histogram creation.
-        //TODO: hacer sobre carga, si no indicamos nombre de archivo que coja el del archivo  de texto
+        try {
+            // Starts the histogram creation.
+            FileHandler.createCsvFromFile(new File(fileTextPath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            //FileHandler.createCsvFile(FileHandler.readFileToString(filePath), getNameFile(filePath));
+        //FileHandler.createCsvFile(FileHandler.readFileToString(filePath), getNameFile(filePath));
 
 
         System.out.println("OK");
