@@ -61,7 +61,7 @@ public class ConsoleMenu {
         System.out.println("Menu Principal");
         System.out.println("\t1. Iniciar histograma.");
         System.out.println("\t2. Opciones.");
-        System.out.println("\t3. Salir");
+        System.out.println("\t3. Salir.");
     }
 
     public void menuHistogramText() {
@@ -119,13 +119,18 @@ public class ConsoleMenu {
         Boolean tempUseConfiguredSaveDir = false;
         if (getUseConfiguredSaveDir()) {
             //Ask if user wants tu use this time
-            System.out.println("¿Usar la carpeta de guardado, para el archivo CSV? " + yesOrNotText());
-            System.out.println("\t" + FileHandler.getDirPath());
+            System.out.println("¿Usar la carpeta de guardado, para el archivo CSV?: " + yesOrNotText());
+            System.out.println("\t" + FileHandler.getConfiguredCsvSavePath());
             tempUseConfiguredSaveDir = askYesOrNot();
         }
 
         // Desactive option Or doesn't want to use "configured save dir"
-        if (!tempUseConfiguredSaveDir) menuSelectDirSavePath(fileTextPath);
+        if (!tempUseConfiguredSaveDir) {
+            menuSelectDirSavePath(fileTextPath);
+        } else {
+            //set the save dir path
+            FileHandler.setSaveDirPath(FileHandler.getConfiguredCsvSavePath());
+        }
 
         try {
             // Starts the histogram creation.
@@ -170,7 +175,7 @@ public class ConsoleMenu {
 
         if (askYesOrNot()) {
             setUseConfiguredSaveDir(true);
-            var file = new File(FileHandler.getDirPath());
+            var file = new File(FileHandler.getConfiguredCsvSavePath());
 
             System.out.println("Última carpeta de guardado registrada: ");
             System.out.println("\t" + file.getAbsolutePath());
@@ -187,7 +192,7 @@ public class ConsoleMenu {
                     System.out.println("No se ha podido resgistrar la nueva carpeta de guardado");
                     e.printStackTrace();
                 } finally {
-                    FileHandler.setDirPath(newDirPath);
+                    FileHandler.setConfiguredCsvSavePath(newDirPath);
                 }
                 pressEnterToContinue();
             }
@@ -200,7 +205,7 @@ public class ConsoleMenu {
     //menuSelect... Methods
     private void menuSelectDirSavePath(String filePath) {
         String dirPath = getContainerFile(filePath);
-        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? " + yesOrNotText());
+        System.out.println("¿Quieres guardar el csv en la misma carpeta que el archivo origen? " + yesOrNotText());
         System.out.println("\t" + dirPath);
         //Confirm if user want to change the dir for the writer
         Boolean confirmDir = askYesOrNot();
@@ -209,7 +214,7 @@ public class ConsoleMenu {
             dirPath = getInputDirPath();
         }
 
-        FileHandler.setDirPath(dirPath);
+        FileHandler.setSaveDirPath(dirPath);
     }
 
     private String menuSelectTextFile() {

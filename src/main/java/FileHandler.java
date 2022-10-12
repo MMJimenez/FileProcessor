@@ -2,22 +2,32 @@ import java.io.*;
 import java.util.HashMap;
 
 public class FileHandler {
-    private static String dirPath = "";
+    // the file_processor.config --> csv_save_path property
+    private static String configuredCsvSavePath = "";
+    // from the user
+    private static String saveDirPath = "";
 
-    public static String getDirPath() {
-        return dirPath;
+    public static String getSaveDirPath() {
+        return saveDirPath;
     }
 
-    public static void setDirPath(String dirPath) {
-        FileHandler.dirPath = dirPath;
-        //TODO: Modify in file_processor.config
+    public static void setSaveDirPath(String saveDirPath) {
+        FileHandler.saveDirPath = saveDirPath;
+    }
+
+    public static String getConfiguredCsvSavePath() {
+        return configuredCsvSavePath;
+    }
+
+    public static void setConfiguredCsvSavePath(String configuredCsvSavePath) {
+        FileHandler.configuredCsvSavePath = configuredCsvSavePath;
     }
 
     static {
         var configHandler = new ConfigHandler();
         try {
             String tempDirPath = configHandler.loadPropertyOrRestoreIt("csv_save_path");
-            setDirPath(tempDirPath);
+            setConfiguredCsvSavePath(tempDirPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -27,7 +37,7 @@ public class FileHandler {
             throws IOException {
         String name = textFile.getName().split("\\.")[0];
         //TODO revisar lo del dirPath
-        String path = getDirPath() + File.separatorChar + name;
+        String path = getSaveDirPath() + File.separatorChar + name;
         String extension = ".csv";
 
         File file = new File(path + extension);
