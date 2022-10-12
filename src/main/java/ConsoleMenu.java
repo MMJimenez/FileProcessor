@@ -11,8 +11,6 @@ public class ConsoleMenu {
         OPTION_NOT_EXIST, WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
     }
 
-    private Boolean useConfiguredSaveDir = false;
-
     Map<ERROR_KEY, String> ERROR_MSG = Map.ofEntries(
             entry(ERROR_KEY.OPTION_NOT_EXIST, "Esa opción no existe."),
             entry(ERROR_KEY.WRONG_NUMBER, "Se espera un número."),
@@ -23,6 +21,8 @@ public class ConsoleMenu {
             //entry(ERROR_KEY.TRY_AGAIN, "Porfavor, vuelva a intentarlo.")
     );
 
+    private Boolean useConfiguredSaveDir = false;
+    private String yesOrNotText() { return "'Y'/'N'"; }
     private void printInputMark() {
         System.out.print("-> ");
     }
@@ -52,19 +52,12 @@ public class ConsoleMenu {
 
     public void menuConfigurationText() {
         System.out.println("Opciones");
-        System.out.println("Puedes configurar una carpeta para guardar los csv resultantes. Se usará siempre sin preguntar.");
-        System.out.println("Puedes deshabilitarla en cualquier momento volviendo a este menu.");
-        System.out.print("\t1. Carpeta guardado: ");
-        if (!useConfiguredSaveDir) {
-            System.out.println("DESACTIVADA");
-        } else {
-            System.out.println("ACTIVADA");
-        }
+        System.out.print("\t1. Configuración carpeta guardado: ");
+        System.out.println(useConfiguredSaveDir ? "ACTIVADA" : "DESACTIVADA");
         System.out.println("\t2. Volver sin hacer cambios.");
     }
 
     public void mainLoop() {
-        title();
         while (true) {
             mainMenuController();
         }
@@ -73,6 +66,8 @@ public class ConsoleMenu {
 
     //menu controllers
     public void mainMenuController() {
+        screenCleaner();
+        title();
         menuMainText();
 
         Boolean isValidOption = false;
@@ -85,7 +80,6 @@ public class ConsoleMenu {
                     break;
                 case 2:
                     isValidOption = true;
-                    menuConfigurationText();
                     menuConfigurationController();
                     break;
                 case 3:
@@ -112,6 +106,9 @@ public class ConsoleMenu {
     }
 
     private void menuConfigurationController() {
+        screenCleaner();
+        menuConfigurationText();
+
         Boolean isValidOption = false;
         while (!isValidOption) {
             Integer optionNum = getInputNumber();
@@ -119,7 +116,7 @@ public class ConsoleMenu {
                 case 1:
                     isValidOption = true;
                     //Configurar path
-                    menuHistogramController();
+                    menuSelectSaveDirectory();
                     break;
                 case 2:
                     isValidOption = true;
@@ -132,28 +129,45 @@ public class ConsoleMenu {
     }
 
     private void menuSelectSaveDirectory() {
-        var file = new File(FileHandler.getDirPath());
-        if (!useConfiguredSaveDir) {
-            System.out.println("¿Quieres ACTIVAR la opción?: ");
-            //askYesOrNot()
+        System.out.println("Configuracion de carpeta de guardado.");
+        System.out.println("Configura una carpeta para guardar los csv resultantes.");
+        System.out.println("\tCuando esta Activado se te preguntará si usarla durante la función de histograma.");
+        System.out.println("\tCuando esta Desactivada no se la carpeta de guardado durante el histograma.");
+        System.out.println();
+        System.out.println("¿Quieres " + (useConfiguredSaveDir ? "Mantener Activada" : "Activar") + " la opcion? " + yesOrNotText());
+        if (askYesOrNot()) {
+            useConfiguredSaveDir = true;
+            var file = new File(FileHandler.getDirPath());
+
+            System.out.println("Última carpeta de guardado registrada: ");
+            System.out.println("\t" + file.getAbsolutePath());
+            System.out.println("¿Quieres usar otra?: " + yesOrNotText());
+
+            if (askYesOrNot()) {
+                System.out.println("Indica la ruta de la carpeta");
+                String newDirPath = getInputDirPath();
+                var config = new ConfigHandler();
+                try {
+                    config.saveProperty("csv_save_path", newDirPath);
+                    System.out.println("Carpeta de guardado actualizada correctamente");
+                } catch (IOException e) {
+                    System.out.println("No se ha podido resgistrar la nueva carpeta de guardado");
+                    e.printStackTrace();
+                } finally {
+                    FileHandler.setDirPath(newDirPath);
+                }
+                pressEnterToContinue();
+            }
+
         } else {
-            System.out.println("¿Quieres DESACTIVAR la opción?:  ");
-            //askYesOrNot()
-        }
-
-
-        if (useConfiguredSaveDir) {
-            System.out.println("Configuración de carpeta de guardado");
-            System.out.println("Esta es la carpeta que hay por defecto: ");
-            System.out.println("\t" + file.getPath());
-            System.out.println("¿Quieres usar otra?: ");
+            useConfiguredSaveDir = false;
         }
     }
 
-
+    //menuSelect... Methods
     private void menuSelectDirSavePath(String filePath) {
         String dirPath = getContainerFile(filePath);
-        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? 'Y'/'N'");
+        System.out.println("¿Quieres guardar el CSV resultante en la misma carpeta? " + yesOrNotText());
         System.out.println("\t" + dirPath);
         //Confirm if user want to change the dir for the writer
         Boolean confirmDir = askYesOrNot();
@@ -182,7 +196,7 @@ public class ConsoleMenu {
                 e.printStackTrace();
             }
             //Ask for confirmation that this is the correct text file
-            System.out.println("\n¿Es este el archivo? 'Y'/'N'");
+            System.out.println("\n¿Es este el archivo? " + 'Y'/'N');
             isFile = askYesOrNot();
         }
 
@@ -287,4 +301,9 @@ public class ConsoleMenu {
         return answer.equalsIgnoreCase("y");
     }
 
+    private void pressEnterToContinue() {
+        System.out.println("Presiona Enter para continuar");
+        Scanner input = new Scanner(System.in);
+        input.next();
+    }
 }
