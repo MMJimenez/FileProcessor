@@ -20,7 +20,7 @@ public class ConfigHandler {
         return fullConfigPath;
     }
 
-    public void createConfigFile() throws IOException {
+    private void createConfigFile() throws IOException {
         var configFile = new File(getFullConfigPath());
         configFile.createNewFile();
 
@@ -66,7 +66,7 @@ public class ConfigHandler {
         configProperties.store(fileOutputStream, COMMENT_STORE);
     }
 
-    public String restoreFromDefaultConfigFile(String propertyName) throws IOException {
+    private String restoreFromDefaultConfigFile(String propertyName) throws IOException {
         var configFile = new FileInputStream(getFullConfigPath());
         var configProperties = new Properties();
         configProperties.load(configFile);

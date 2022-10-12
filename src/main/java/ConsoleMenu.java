@@ -8,7 +8,7 @@ import static java.util.Map.entry;
 
 public class ConsoleMenu {
     private enum ERROR_KEY {
-        OPTION_NOT_EXIST, WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR, TRY_AGAIN
+        OPTION_NOT_EXIST, WRONG_NUMBER, FILE_NOT_FOUND, NOT_Y_OR_N, IS_NOT_FILE, IS_NOT_DIR
     }
 
     Map<ERROR_KEY, String> ERROR_MSG = Map.ofEntries(
@@ -18,13 +18,31 @@ public class ConsoleMenu {
             entry(ERROR_KEY.NOT_Y_OR_N, "Se espera: 'Y' o 'N'."),
             entry(ERROR_KEY.IS_NOT_FILE, "Se espera un Archivo, no una carpeta."),
             entry(ERROR_KEY.IS_NOT_DIR, "Se espera un Archivo, no una carpeta.")
-            //entry(ERROR_KEY.TRY_AGAIN, "Porfavor, vuelva a intentarlo.")
     );
 
-    private Boolean useConfiguredSaveDir = false;
+    private static Boolean useConfiguredSaveDir = false;
+
+    public Boolean getUseConfiguredSaveDir() {
+        return useConfiguredSaveDir;
+    }
+
+    public static void setUseConfiguredSaveDir(Boolean useConfiguredSaveDir) {
+        ConsoleMenu.useConfiguredSaveDir = useConfiguredSaveDir;
+    }
+
     private String yesOrNotText() { return "'Y'/'N'"; }
     private void printInputMark() {
         System.out.print("-> ");
+    }
+
+    static {
+        var configHandler = new ConfigHandler();
+        try {
+            String tempUseSaveDir = configHandler.loadPropertyOrRestoreIt("use_save_dir");
+            setUseConfiguredSaveDir(Boolean.valueOf(tempUseSaveDir));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void screenCleaner() {
@@ -53,7 +71,7 @@ public class ConsoleMenu {
     public void menuConfigurationText() {
         System.out.println("Opciones");
         System.out.print("\t1. Configuración carpeta guardado: ");
-        System.out.println(useConfiguredSaveDir ? "ACTIVADA" : "DESACTIVADA");
+        System.out.println(getUseConfiguredSaveDir() ? "ACTIVADA" : "DESACTIVADA");
         System.out.println("\t2. Volver sin hacer cambios.");
     }
 
@@ -95,7 +113,7 @@ public class ConsoleMenu {
     private void menuHistogramController() {
         screenCleaner();
         String fileTextPath = menuSelectTextFile();
-        if (!useConfiguredSaveDir) menuSelectDirSavePath(fileTextPath);
+        if (!getUseConfiguredSaveDir()) menuSelectDirSavePath(fileTextPath);
 
         try {
             // Starts the histogram creation.
@@ -134,9 +152,9 @@ public class ConsoleMenu {
         System.out.println("\tCuando esta Activado se te preguntará si usarla durante la función de histograma.");
         System.out.println("\tCuando esta Desactivada no se la carpeta de guardado durante el histograma.");
         System.out.println();
-        System.out.println("¿Quieres " + (useConfiguredSaveDir ? "Mantener Activada" : "Activar") + " la opcion? " + yesOrNotText());
+        System.out.println("¿Quieres " + (getUseConfiguredSaveDir() ? "Mantener Activada" : "Activar") + " la opcion? " + yesOrNotText());
         if (askYesOrNot()) {
-            useConfiguredSaveDir = true;
+            setUseConfiguredSaveDir(true);
             var file = new File(FileHandler.getDirPath());
 
             System.out.println("Última carpeta de guardado registrada: ");
@@ -160,7 +178,7 @@ public class ConsoleMenu {
             }
 
         } else {
-            useConfiguredSaveDir = false;
+            setUseConfiguredSaveDir(false);
         }
     }
 
@@ -304,6 +322,6 @@ public class ConsoleMenu {
     private void pressEnterToContinue() {
         System.out.println("Presiona Enter para continuar");
         Scanner input = new Scanner(System.in);
-        input.next();
+        input.nextLine();
     }
 }

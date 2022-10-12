@@ -17,9 +17,6 @@ public class FileHandler {
         var configHandler = new ConfigHandler();
         try {
             String tempDirPath = configHandler.loadPropertyOrRestoreIt("csv_save_path");
-            if (!new File(tempDirPath).exists()) {
-                tempDirPath = configHandler.restoreFromDefaultConfigFile("csv_save_path");
-            }
             setDirPath(tempDirPath);
         } catch (IOException e) {
             e.printStackTrace();
