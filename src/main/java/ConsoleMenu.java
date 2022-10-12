@@ -45,6 +45,7 @@ public class ConsoleMenu {
         }
     }
 
+    //Methods...
     public void screenCleaner() {
         for (int i = 0; i < 20; i++) System.out.println();
     }
@@ -113,11 +114,24 @@ public class ConsoleMenu {
     private void menuHistogramController() {
         screenCleaner();
         String fileTextPath = menuSelectTextFile();
-        if (!getUseConfiguredSaveDir()) menuSelectDirSavePath(fileTextPath);
+
+        // If the user Active the "configured save dir". from the file_processor.config
+        Boolean tempUseConfiguredSaveDir = false;
+        if (getUseConfiguredSaveDir()) {
+            //Ask if user wants tu use this time
+            System.out.println("¿Usar la carpeta de guardado, para el archivo CSV? " + yesOrNotText());
+            System.out.println("\t" + FileHandler.getDirPath());
+            tempUseConfiguredSaveDir = askYesOrNot();
+        }
+
+        // Desactive option Or doesn't want to use "configured save dir"
+        if (!tempUseConfiguredSaveDir) menuSelectDirSavePath(fileTextPath);
 
         try {
             // Starts the histogram creation.
             FileHandler.createCsvFromFile(new File(fileTextPath));
+            System.out.println();
+            pressEnterToContinue();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -153,6 +167,7 @@ public class ConsoleMenu {
         System.out.println("\tCuando esta Desactivada no se la carpeta de guardado durante el histograma.");
         System.out.println();
         System.out.println("¿Quieres " + (getUseConfiguredSaveDir() ? "Mantener Activada" : "Activar") + " la opcion? " + yesOrNotText());
+
         if (askYesOrNot()) {
             setUseConfiguredSaveDir(true);
             var file = new File(FileHandler.getDirPath());
@@ -214,7 +229,7 @@ public class ConsoleMenu {
                 e.printStackTrace();
             }
             //Ask for confirmation that this is the correct text file
-            System.out.println("\n¿Es este el archivo? " + 'Y'/'N');
+            System.out.println("\n¿Es este el archivo? " + yesOrNotText());
             isFile = askYesOrNot();
         }
 
@@ -291,12 +306,6 @@ public class ConsoleMenu {
         return filePath;
     }
 
-    private String getNameFile(String filePath) {
-        var file = new File(filePath);
-        if (file.exists()) return file.getName();
-        else return "result_csv";
-    }
-
     private String getContainerFile(String filePath) {
         var file = new File(filePath);
         if (file.exists()) return file.getParentFile().getAbsolutePath();
@@ -320,7 +329,7 @@ public class ConsoleMenu {
     }
 
     private void pressEnterToContinue() {
-        System.out.println("Presiona Enter para continuar");
+        System.out.println("(Presiona Enter para continuar)");
         Scanner input = new Scanner(System.in);
         input.nextLine();
     }
