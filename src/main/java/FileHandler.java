@@ -40,10 +40,10 @@ public class FileHandler {
         String path = getSaveDirPath() + File.separatorChar + name;
         String extension = ".csv";
 
-        File file = new File(path + extension);
+        File file = new File(path + "_histograma" + extension);
         Integer numeration = 1;
         while (file.exists()) {
-            String tempPath = (path + "(" + numeration + ")" + extension);
+            String tempPath = (path + "_histograma" + "(" + numeration + ")" + extension);
             file = new File(tempPath);
             numeration++;
         }
