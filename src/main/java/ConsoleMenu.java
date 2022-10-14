@@ -17,7 +17,7 @@ public class ConsoleMenu {
             entry(ERROR_KEY.FILE_NOT_FOUND, "No se ha encontrado."),
             entry(ERROR_KEY.NOT_Y_OR_N, "Se espera: 'Y' o 'N'."),
             entry(ERROR_KEY.IS_NOT_FILE, "Se espera un Archivo, no una carpeta."),
-            entry(ERROR_KEY.IS_NOT_DIR, "Se espera un Archivo, no una carpeta.")
+            entry(ERROR_KEY.IS_NOT_DIR, "Se espera una Carpeta, no un archivo.")
     );
 
     private static Boolean useConfiguredSaveDir = false;
@@ -173,8 +173,11 @@ public class ConsoleMenu {
         System.out.println();
         System.out.println("¿Quieres " + (getUseConfiguredSaveDir() ? "Mantener Activada" : "Activar") + " la opcion? " + yesOrNotText());
 
+        var config = new ConfigHandler();
         if (askYesOrNot()) {
             setUseConfiguredSaveDir(true);
+
+
             var file = new File(FileHandler.getConfiguredCsvSavePath());
 
             System.out.println("Última carpeta de guardado registrada: ");
@@ -184,7 +187,7 @@ public class ConsoleMenu {
             if (askYesOrNot()) {
                 System.out.println("Indica la ruta de la carpeta");
                 String newDirPath = getInputDirPath();
-                var config = new ConfigHandler();
+
                 try {
                     config.saveProperty("csv_save_path", newDirPath);
                     System.out.println("Carpeta de guardado actualizada correctamente");
@@ -199,6 +202,12 @@ public class ConsoleMenu {
 
         } else {
             setUseConfiguredSaveDir(false);
+        }
+        try {
+            config.saveProperty("use_save_dir", getUseConfiguredSaveDir().toString());
+        } catch (IOException e) {
+            System.out.println("No se ha guardado la configuración correctamente.");
+            e.printStackTrace();
         }
     }
 
@@ -226,7 +235,6 @@ public class ConsoleMenu {
             fileTextPath = getInputFilePath();
 
             try {
-                screenCleaner();
                 //Print the file
                 FileHandler.showFile(fileTextPath);
             } catch (IOException e) {
@@ -265,10 +273,8 @@ public class ConsoleMenu {
             //Checks if the file is correct.
             if (!file.exists()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.FILE_NOT_FOUND));
-                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else if (file.isDirectory()) {
                 System.out.println(ERROR_MSG.get(ERROR_KEY.IS_NOT_FILE));
-                //System.out.println(ERROR_MSG.get(ERROR_KEY.TRY_AGAIN));
             } else {
                 isCorrect = true;
             }
